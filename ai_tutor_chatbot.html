@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>사대부고 통합과학 AI 튜터</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    #chat { white-space: pre-wrap; margin-bottom: 20px; border: 1px solid #ccc; padding: 10px; height: 400px; overflow-y: auto; }
+    #userInput { width: 80%; padding: 10px; }
+    button { padding: 10px; }
+  </style>
+</head>
+<body>
+  <h2>사대부고 통합과학 1 AI 튜터</h2>
+  <div id="chat"></div>
+  <input type="text" id="userInput" placeholder="메시지를 입력하세요">
+  <button onclick="sendMessage()">보내기</button>
+
+  <script>
+    const chat = document.getElementById("chat");
+    const input = document.getElementById("userInput");
+
+    const systemPrompt = `당신은 고등학교 1학년 통합과학1 수업에 참여 중인 학생에게 ‘유전정보 발현(DNA → RNA → 단백질)’ 과정을 안내하는 AI 튜터입니다.
+학생은 "자신의 세포" 역할을 맡고 있으며... (중략: 전체 시스템 프롬프트가 여기에 포함됨)
+`;
+
+    let messages = [
+      { role: "system", content: systemPrompt }
+    ];
+
+    async function sendMessage() {
+      const userMessage = input.value;
+      if (!userMessage) return;
+
+      chat.innerText += "👤 학생: " + userMessage + "\n";
+      messages.push({ role: "user", content: userMessage });
+      input.value = "";
+
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer sk-...API_KEY..."
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: messages
+        })
+      });
+
+      const data = await response.json();
+      const aiMessage = data.choices[0].message.content;
+      chat.innerText += "🤖 AI 튜터: " + aiMessage + "\n\n";
+      messages.push({ role: "assistant", content: aiMessage });
+    }
+  </script>
+</body>
+</html>
